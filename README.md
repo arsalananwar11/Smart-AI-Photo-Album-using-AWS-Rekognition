@@ -1,0 +1,1 @@
+# Smart-AI-Photo-Album-using-AWS-Rekognition
