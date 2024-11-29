@@ -1,0 +1,97 @@
+<!-- Template: http://getbootstrap.com/examples/cover/ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="This is a starter project for a chatbot concierge application built on AWS.">
+
+    <title>Photo Album</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="./assets/css/index.css" rel="stylesheet">
+
+    <!-- api gateway generated sdk -->
+    <script src="./assets/js/sdk/lib/axios/dist/axios.standalone.js"></script>
+    <script src="./assets/js/sdk/lib/CryptoJS/rollups/hmac-sha256.js"></script>
+    <script src="./assets/js/sdk/lib/CryptoJS/rollups/sha256.js"></script>
+    <script src="./assets/js/sdk/lib/CryptoJS/components/hmac.js"></script>
+    <script src="./assets/js/sdk/lib/CryptoJS/components/enc-base64.js"></script>
+    <script src="./assets/js/sdk/lib/url-template/url-template.js"></script>
+    <script src="./assets/js/sdk/lib/apiGatewayCore/sigV4Client.js"></script>
+    <script src="./assets/js/sdk/lib/apiGatewayCore/apiGatewayClient.js"></script>
+    <script src="./assets/js/sdk/lib/apiGatewayCore/simpleHttpClient.js"></script>
+    <script src="./assets/js/sdk/lib/apiGatewayCore/utils.js"></script>
+
+    <script src="./assets/js/sdk/apigClient.js"></script>
+
+    <script src="./assets/js/aws-sdk.min.js"></script>
+    
+    
+    
+    <style>
+        /* Apply CSS to the body */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding-top: 20px; /* Add padding to the top */
+        }
+    </style>
+
+  </head>
+<body class="bg">
+    <h1 class="display-4 text-center fw-bold">Photo Album</h1>
+    <div id="alert">
+    </div>
+    
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div id="search-form" class="mb-4">
+                    <input type="text" id="search-input" class="form-control" placeholder="Enter your search query">
+                </br>
+                    <button id="search-button" class="btn btn-primary mt-2">Search</button>
+                </div>
+            </div>
+        </div>
+        <!-- <div class="container" id="search-results"> -->
+        <div id='gallery-row' class="row">
+        
+        </div>
+        <!-- </div> -->
+
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div id="upload-form">
+                    <input type="file" id="photoupload" class="form-control-file mb-2" accept="image/*" onchange="loadFile(event)">                
+                    <img class="img-fluid" style="max-width: 100%; max-height: 300px;" id="previewImage"></img>
+                    <input type="text" id="custom-labels" class="form-control mb-2" placeholder="Enter custom labels (comma separated)">
+                </div>
+            </div>
+            <div class="col-md-8 mx-auto">
+                <button id="upload-button" class="btn btn-success">Upload</button>
+            </div>
+        </div>
+    </div>      
+    </body>
+    <!-- Placed at the end of the document so the pages load faster -->
+    <!-- custom scroll bar -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.3/jquery.mCustomScrollbar.concat.min.js'></script>
+    <script src="./assets/js/bootstrap.min.js"></script>
+        <!-- <script>window.jQuery || document.write('<script src="./assets/js/vendor/jquery.min.js"><\/script>')</script> -->
+    
+        <!-- index js -->
+        <script src="./assets/js/index.js"></script>
+        <!-- gallery.js -->
+        <!-- <script src="./assets/js/gallery.js"></script> -->
+    
+        <script>
+    
+            var sdk = apigClientFactory.newClient({});
+      
+        </script>
+</html>
