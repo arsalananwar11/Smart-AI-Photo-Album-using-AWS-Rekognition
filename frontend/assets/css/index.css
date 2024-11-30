@@ -27,3 +27,7 @@ img:hover, img:active  {
   background-attachment: fixed; /* Fix the background image */
   z-index: -1; /* Ensure the background is at the back */
 }
+
+.top-text {
+  color: white;
+}
