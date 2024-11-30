@@ -3,6 +3,7 @@ import boto3
 import logging
 import os
 from elasticsearch import Elasticsearch
+import uuid
 
 logger = logging.getLogger()
 logger.setLevel("INFO")
@@ -13,7 +14,7 @@ ES_INDEX_NAME="photos"
 ES_USERNAME=os.environ.get('ES_USERNAME')
 ES_PASSWORD=os.environ.get('ES_PASSWORD')
 BOT_ID=os.environ.get('BOT_ID')
-SESSION_ID=os.environ.get('SESSION_ID')
+SESSION_ID= str(uuid.uuid4()),
 
 def search_doc(labels):
 
