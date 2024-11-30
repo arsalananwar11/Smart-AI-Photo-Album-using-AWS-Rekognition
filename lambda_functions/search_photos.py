@@ -7,6 +7,7 @@ from elasticsearch import Elasticsearch
 logger = logging.getLogger()
 logger.setLevel("INFO")
 
+# Fetch all configurations
 ES_HOST=os.environ.get('ES_HOST')
 ES_INDEX_NAME="photos"
 ES_USERNAME=os.environ.get('ES_USERNAME')
@@ -83,7 +84,6 @@ def lambda_handler(event, context):
         
         logger.info(search_results)
         if not search_results:
-            #return empty response
             return {
                 "statusCode": 202,
                 "headers": {

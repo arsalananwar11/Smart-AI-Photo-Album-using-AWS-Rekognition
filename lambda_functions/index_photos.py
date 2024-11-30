@@ -3,6 +3,7 @@ import boto3
 import os
 from elasticsearch import Elasticsearch 
 
+# Fetch all configurations
 ES_HOST=os.environ.get('ES_HOST')
 ES_INDEX_NAME="photos"
 ES_USERNAME=os.environ.get('ES_USERNAME')
