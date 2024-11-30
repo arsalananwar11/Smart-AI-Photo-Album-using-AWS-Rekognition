@@ -11,10 +11,10 @@ phases:
   post_build:
     commands:
       - echo "Updating Index and Search Lambda Functions"
-      - aws lambda update-function-code --function-name index_photos --zip-file fileb://deployment_package_index_photos.zip
-      - aws lambda wait function-updated --function-name index_photos
-      - aws lambda update-function-configuration --function-name index_photos --handler index_photos.lambda_handler
-      - aws lambda update-function-code  --function-name search_photos --zip-file fileb://deployment_package_search_photos.zip
-      - aws lambda wait function-updated --function-name search_photos
-      - aws lambda update-function-configuration --function-name search_photos --handler search_photos.lambda_handler
+      - aws lambda update-function-code --function-name Cloud-A3-Index-Photos --zip-file fileb://deployment_package_index_photos.zip
+      - aws lambda wait function-updated --function-name Cloud-A3-Index-Photos
+      - aws lambda update-function-configuration --function-name Cloud-A3-Index-Photos --handler Cloud-A3-Index-Photos.lambda_handler
+      - aws lambda update-function-code  --function-name Cloud-A3-Search-Photos --zip-file fileb://deployment_package_search_photos.zip
+      - aws lambda wait function-updated --function-name Cloud-A3-Search-Photos
+      - aws lambda update-function-configuration --function-name Cloud-A3-Search-Photos --handler Cloud-A3-Search-Photos.lambda_handler
       - echo "Done Updating Index and Search Lambda Functions!!"
