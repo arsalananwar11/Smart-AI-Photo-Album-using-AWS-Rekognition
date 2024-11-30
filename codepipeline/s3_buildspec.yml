@@ -1,0 +1,6 @@
+version: 0.2
+phases:
+  build:
+    commands:
+    - echo "Deploying to S3 Frontend Smart AI Photo Album Website"
+    - aws s3 cp frontend s3://photos-frontend-bucket/ --recursive
