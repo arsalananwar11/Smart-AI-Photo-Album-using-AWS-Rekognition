@@ -9,12 +9,13 @@ logger = logging.getLogger()
 logger.setLevel("INFO")
 
 # Fetch all configurations
+# Changing file to trigger pipelines
 ES_HOST=os.environ.get('ES_HOST')
 ES_INDEX_NAME="photos"
 ES_USERNAME=os.environ.get('ES_USERNAME')
 ES_PASSWORD=os.environ.get('ES_PASSWORD')
 BOT_ID=os.environ.get('BOT_ID')
-SESSION_ID= str(uuid.uuid4()),
+SESSION_ID= str(uuid.uuid4())
 
 def search_doc(labels):
 

@@ -1,0 +1,238 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AI Photo Search Application with S3, Lambda, API Gateway,
+  Rekognition, OpenSearch, and Lex interconnections.
+
+Parameters:
+  codeBucketName:
+    Description: The S3 bucket where Lambda code and dependencies are stored.
+    Type: String
+    Default: my-code-bucket
+  photoBucketName:
+    Description: S3 bucket for storing uploaded photos.
+    Type: String
+    Default: photo-storage-bucket
+  frontendBucketName:
+    Description: S3 bucket for hosting the frontend website.
+    Type: String
+    Default: photo-frontend-bucket
+  lambdaFunction1KeyName:
+    Description: S3 key for Lambda function 1 (IndexPhotosLambda) code.
+    Type: String
+    Default: lf1.zip
+  lambdaFunction2KeyName:
+    Description: S3 key for Lambda function 2 (SearchPhotosLambda) code.
+    Type: String
+    Default: lf2.zip
+  ESHOST:
+    Description: OpenSearch endpoint URL.
+    Type: String
+    Default: https://placeholder-opensearch-domain.us-east-1.es.amazonaws.com
+  ESINDEXNAME:
+    Description: OpenSearch index name.
+    Type: String
+    Default: photos-index
+  ESUSERNAME:
+    Description: OpenSearch username.
+    Type: String
+    Default: admin
+  ESPASSWORD:
+    Description: OpenSearch password.
+    Type: String
+    Default: password123
+
+Resources:
+  #### S3 Buckets ####
+  PhotosBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref photoBucketName
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods:
+              - PUT
+            AllowedOrigins:
+              - '*'
+            AllowedHeaders:
+              - '*'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        IgnorePublicAcls: false
+
+  PhotosBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref PhotosBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+            Resource: !Sub ${PhotosBucket.Arn}/*
+
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref frontendBucketName
+      WebsiteConfiguration:
+        IndexDocument: index.html
+    DeletionPolicy: Retain
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub ${FrontendBucket.Arn}/*
+
+  #### OpenSearch Service ####
+  OpenSearchDomain:
+    Type: AWS::Elasticsearch::Domain
+    Properties:
+      DomainName: photo-search
+      ElasticsearchVersion: 7.1
+      ElasticsearchClusterConfig:
+        InstanceType: t3.small.elasticsearch
+        InstanceCount: 1
+      EBSOptions:
+        EBSEnabled: true
+        VolumeSize: 10
+        VolumeType: gp2
+      AccessPolicies:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: '*'
+            Action:
+              - es:ESHttpGet
+              - es:ESHttpPost
+            Resource: !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/photo-search/*
+
+  #### Lambda Functions ####
+  IndexPhotosLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: index-photos-lambda
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.9
+      Code:
+        S3Bucket: !Ref codeBucketName
+        S3Key: !Ref lambdaFunction1KeyName
+      Timeout: 30
+      Environment:
+        Variables:
+          ES_HOST: !Sub https://${OpenSearchDomain.DomainEndpoint}
+          ES_INDEX_NAME: !Ref ESINDEXNAME
+          ES_USERNAME: !Ref ESUSERNAME
+          ES_PASSWORD: !Ref ESPASSWORD
+      Role: !GetAtt IndexPhotosRole.Arn
+
+  SearchPhotosLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: search-photos-lambda
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.9
+      Code:
+        S3Bucket: !Ref codeBucketName
+        S3Key: !Ref lambdaFunction2KeyName
+      Timeout: 30
+      Environment:
+        Variables:
+          ES_HOST: !Sub https://${OpenSearchDomain.DomainEndpoint}
+          ES_INDEX_NAME: !Ref ESINDEXNAME
+          ES_USERNAME: !Ref ESUSERNAME
+          ES_PASSWORD: !Ref ESPASSWORD
+      Role: !GetAtt SearchPhotosRole.Arn
+
+  #### Lambda Permissions ####
+  PhotosBucketLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt IndexPhotosLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceArn: !GetAtt PhotosBucket.Arn
+
+  #### IAM Roles ####
+  IndexPhotosRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: S3RekognitionPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - rekognition:DetectLabels
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Sub ${PhotosBucket.Arn}/*
+
+  SearchPhotosRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: OpenSearchPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - es:ESHttpGet
+                  - es:ESHttpPost
+                Resource: '*'
+
+  #### API Gateway ####
+  PhotoSearchAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: PhotoSearchAPI
+      Description: API for uploading and searching photos.
+
+  UploadPhotosMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref PhotoSearchAPI
+      ResourceId: !Ref PhotosBucket
+      HttpMethod: PUT
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: PUT
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:s3:path/${PhotosBucket}
+
+Outputs:
+  FrontendURL:
+    Description: Public URL of the frontend S3 bucket.
+    Value: !GetAtt FrontendBucket.WebsiteURL
+
+  APIGatewayURL:
+    Description: Base URL for the API Gateway.
+    Value: !Sub https://${PhotoSearchAPI}.execute-api.${AWS::Region}.amazonaws.com
+
+  OpenSearchEndpoint:
+    Description: OpenSearch Domain Endpoint.
+    Value: !Sub https://${OpenSearchDomain.DomainEndpoint}
