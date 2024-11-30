@@ -1,0 +1,20 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+  build:
+    commands:
+      - zip -r -j deployment_package_index_photos.zip "lambda_functions/index_photos.py"
+      - zip -r -j deployment_package_search_photos.zip "lambda_functions/search_photos.py"
+  post_build:
+    commands:
+      - echo "Updating Lambda functions"
+      - aws lambda update-function-code --function-name index_photos --zip-file fileb://deployment_package_index_photos.zip
+      - aws lambda wait function-updated --function-name index_photos
+      - aws lambda update-function-configuration --function-name index_photos --handler index_photos.lambda_handler
+      - aws lambda update-function-code --function-name search_photos --zip-file fileb://deployment_package_search_photos.zip
+      - aws lambda wait function-updated --function-name search_photos
+      - aws lambda update-function-configuration --function-name search_photos --handler search_photos.lambda_handler
+      - echo "DONE!!"
