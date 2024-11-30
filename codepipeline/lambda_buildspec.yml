@@ -13,8 +13,8 @@ phases:
       - echo "Updating Index and Search Lambda Functions"
       - aws lambda update-function-code --function-name Cloud-A3-Index-Photos --zip-file fileb://deployment_package_index_photos.zip
       - aws lambda wait function-updated --function-name Cloud-A3-Index-Photos
-      - aws lambda update-function-configuration --function-name Cloud-A3-Index-Photos --handler Cloud-A3-Index-Photos.lambda_handler
+      - aws lambda update-function-configuration --function-name Cloud-A3-Index-Photos --handler index_photos.lambda_handler
       - aws lambda update-function-code  --function-name Cloud-A3-Search-Photos --zip-file fileb://deployment_package_search_photos.zip
       - aws lambda wait function-updated --function-name Cloud-A3-Search-Photos
-      - aws lambda update-function-configuration --function-name Cloud-A3-Search-Photos --handler Cloud-A3-Search-Photos.lambda_handler
+      - aws lambda update-function-configuration --function-name Cloud-A3-Search-Photos --handler search_photos.lambda_handler
       - echo "Done Updating Index and Search Lambda Functions!!"
