@@ -1,12 +1,12 @@
 import json
 import boto3
 import os
-from elasticsearch import Elasticsearch
- 
-ES_HOST="<ES_HOST>"
+from elasticsearch import Elasticsearch 
+
+ES_HOST=os.environ.get('ES_HOST')
 ES_INDEX_NAME="photos"
-ES_PASSWORD="<ES_PASSWORD>"
-ES_USERNAME="<ES_USERNAME>"
+ES_USERNAME=os.environ.get('ES_USERNAME')
+ES_PASSWORD=os.environ.get('ES_PASSWORD')
 
 def index_doc(index_name='photos', document={'temp': 'temp'}):
     client = Elasticsearch(
@@ -64,7 +64,7 @@ def lambda_handler(event, context):
         "labels": labels
     }
 
-    response = index_doc(os.environ['ES_INDEX_NAME'], data)
+    response = index_doc(ES_INDEX_NAME, data)
     
     return {
         'statusCode': 200,

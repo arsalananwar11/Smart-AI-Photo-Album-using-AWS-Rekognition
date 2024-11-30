@@ -7,12 +7,12 @@ from elasticsearch import Elasticsearch
 logger = logging.getLogger()
 logger.setLevel("INFO")
 
-ES_HOST="<ES_HOST>"
+ES_HOST=os.environ.get('ES_HOST')
 ES_INDEX_NAME="photos"
-ES_PASSWORD="<ES_PASSWORD>"
-ES_USERNAME="<ES_USERNAME>"
-BOT_ID="<BOT_ID>"
-SESSION_ID="<SESSION_ID>"
+ES_USERNAME=os.environ.get('ES_USERNAME')
+ES_PASSWORD=os.environ.get('ES_PASSWORD')
+BOT_ID=os.environ.get('BOT_ID')
+SESSION_ID=os.environ.get('SESSION_ID')
 
 def search_doc(labels):
 
@@ -58,8 +58,12 @@ def lambda_handler(event, context):
     )
     
     logger.info(f"Received Response from Lex: {response}")
+    
+    #check if keywords identified by the lex
+    
+    if response['sessionState']['intent']['name'] =='SearchIntent' and response['sessionState']['intent']['slots']:
+        #call ES service to fetch the photos
         
-    if response['sessionState']['intent']['name'] =='SearchIntent' and response['sessionState']['intent']['slots']:        
         logger.info(response['sessionState']['intent']['slots'])
         keywords = [ keyword['value']['originalValue'] for keyword in response['sessionState']['intent']['slots'].values() if keyword and keyword['value']['originalValue'] ]
         
